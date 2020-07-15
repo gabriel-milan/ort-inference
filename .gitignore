@@ -1,3 +1,6 @@
+# ONNX files
+*.onnx
+
 # Prerequisites
 *.d
 
