@@ -1,13 +1,18 @@
 # ORT Inference
 
-Edit `main.cxx` to attend your needs. Still in development.
+Edit `ringer.cxx` or `vgg16.cxx` to attend your needs. They're both examples.
+
+* `ringer.cxx` runs the NeuralRinger v8 in ONNX format;
+* `vgg16.cxx` runs the VGG16 in ONNX format;
+
+## Test it
 
 ```
-make
-./main
+make ringer
+make run_ringer
 ```
 
-Sample output for VGG16:
+Sample output for Ringer:
 
 ```
 --> Initializing environment... [OK]
@@ -17,27 +22,57 @@ Sample output for VGG16:
   - Input #0:
    . Name: input_1
    . Type: 1
-   . Number of dimensions: 4
+   . Number of dimensions: 2
       dim #0 -> -1
-      dim #1 -> 224
-      dim #2 -> 224
-      dim #3 -> 3
+      dim #1 -> 100
+   . Input tensor size: 100
  * Number of outputs: 1
   - Output #0:
-   . Name: predictions
+   . Name: activation_1
    . Type: 1
    . Number of dimensions: 2
       dim #0 -> -1
-      dim #1 -> 1000
+      dim #1 -> 1
 --> Initialization is complete!
---> Entering execution...
---> Generating dummy data for testing... [OK]
---> Scoring data... [OK]
- * Score for class 0:  0.000181
- * Score for class 1:  0.002160
- * Score for class 2:  0.000448
- * Score for class 3:  0.000764
- * Score for class 4:  0.001572
---> Execution is complete!
+ - Iteration #0
+Converting input to tensor... [OK]
+Predicting... [OK]
+   . Score: 0.585945
+ - Iteration #1
+Converting input to tensor... [OK]
+Predicting... [OK]
+   . Score: 0.585945
+ - Iteration #2
+Converting input to tensor... [OK]
+Predicting... [OK]
+   . Score: 0.585945
+ - Iteration #3
+Converting input to tensor... [OK]
+Predicting... [OK]
+   . Score: 0.585945
+ - Iteration #4
+Converting input to tensor... [OK]
+Predicting... [OK]
+   . Score: 0.585945
+ - Iteration #5
+Converting input to tensor... [OK]
+Predicting... [OK]
+   . Score: 0.585945
+ - Iteration #6
+Converting input to tensor... [OK]
+Predicting... [OK]
+   . Score: 0.585945
+ - Iteration #7
+Converting input to tensor... [OK]
+Predicting... [OK]
+   . Score: 0.585945
+ - Iteration #8
+Converting input to tensor... [OK]
+Predicting... [OK]
+   . Score: 0.585945
+ - Iteration #9
+Converting input to tensor... [OK]
+Predicting... [OK]
+   . Score: 0.585945
 --> Finalizing... [OK]
 ```

@@ -3,6 +3,7 @@
  *  Date:   July 15, 2020
  *  Licensed under the MIT license
  */
+
 #ifndef ORT_INFERENCE_H
 #define ORT_INFERENCE_H
 
@@ -24,6 +25,8 @@ class ORTInference {
     bool initialize ();
     bool execute ();
     bool finalize ();
+
+    float *predict (std::vector<float> sample_values);
 
     // Default setters/getters
     virtual Ort::Env &getEnv() const { return *env; };
@@ -67,6 +70,7 @@ class ORTInference {
     // Inner work
     size_t num_input_nodes;
     size_t num_output_nodes;
+    size_t input_tensor_size;
     std::vector<int64_t> input_node_dims;
     std::vector<int64_t> output_node_dims;
     std::vector<const char*> input_node_names;

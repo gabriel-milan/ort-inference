@@ -56,6 +56,7 @@ bool ORTInference::initialize () {
   log ("--> Getting model information...");
   num_input_nodes = getSession().GetInputCount();
   num_output_nodes = getSession().GetOutputCount();
+  input_tensor_size = 1;
   char buffer[100];
   sprintf(buffer, " * Number of inputs: %zu", num_input_nodes);
   log (buffer);
@@ -79,8 +80,11 @@ bool ORTInference::initialize () {
     for (short j = 0; j < input_node_dims.size(); j++) {
       sprintf(buffer, "      dim #%d -> %jd", j, input_node_dims[j]);
       log (buffer);
+      if (j > 0) input_tensor_size *= input_node_dims[j];
     }
   }
+  sprintf(buffer, "   . Input tensor size: %zu", input_tensor_size);
+  log(buffer);
   sprintf(buffer, " * Number of outputs: %zu", num_output_nodes);
   log (buffer);
   for (short i = 0; i < num_output_nodes; i++) {
@@ -104,7 +108,7 @@ bool ORTInference::initialize () {
       sprintf(buffer, "      dim #%d -> %jd", j, output_node_dims[j]);
       log (buffer);
     }
-  }
+  }  
 
   // Fix for batch size dimension:
   // https://github.com/microsoft/onnxruntime/issues/3258
@@ -123,31 +127,9 @@ bool ORTInference::initialize () {
 bool ORTInference::execute () {
 
   log ("--> Entering execution...");
-
-  // Generate dummy input for testing
-  log ("--> Generating dummy data for testing...", "");
-  size_t input_tensor_size = 224 * 224 * 3;
-  std::vector<float> input_tensor_values(input_tensor_size);
-  for (unsigned int i = 0; i < input_tensor_size; i++)
-    input_tensor_values[i] = (float)i / (input_tensor_size + 1);
-  auto memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-  Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, input_tensor_values.data(), input_tensor_size, input_node_dims.data(), 4);
-  assert(input_tensor.IsTensor());
-  log (" [OK]");
-
-  // Scoring that dummy data
-  log ("--> Scoring data...", "");
-  auto output_tensors = getSession().Run(Ort::RunOptions{nullptr}, input_node_names.data(), &input_tensor, 1, output_node_names.data(), 1);
-  assert(output_tensors.size() == 1 && output_tensors.front().IsTensor());
-  float* floatarr = output_tensors.front().GetTensorMutableData<float>();
-  log (" [OK]");
-
-  // Printing scores
-  // (won't use log function here since I intend to delete this later)
-  for (int i = 0; i < 5; i++)
-    printf(" * Score for class %d:  %f\n", i, floatarr[i]);
-
+  // Execution code goes here
   log ("--> Execution is complete!");
+  
 }
 
 /*
@@ -155,5 +137,40 @@ bool ORTInference::execute () {
  */
 bool ORTInference::finalize () {
   log ("--> Finalizing...", "");
+  // Finalization code goes here
   log (" [OK]");
+  return true;
+}
+
+/*
+ *  Making predictions
+ */
+float *ORTInference::predict (std::vector<float> sample_values) {
+
+  log ("Converting input to tensor...", "");
+  auto memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+  Ort::Value input_tensor = Ort::Value::CreateTensor<float>(
+    memory_info,
+    sample_values.data(),
+    input_tensor_size,
+    input_node_dims.data(),
+    input_node_dims.size()
+  );
+  assert(input_tensor.IsTensor());
+  log (" [OK]");
+
+  log ("Predicting...", "");
+  auto output_tensors = getSession().Run(Ort::RunOptions{nullptr}, input_node_names.data(), &input_tensor, 1, output_node_names.data(), 1);
+  assert(output_tensors.size() == 1 && output_tensors.front().IsTensor());
+  float* floatarr = output_tensors.front().GetTensorMutableData<float>();
+  log (" [OK]");
+
+  return floatarr;
+}
+
+/*
+ *  Changing optimization parameters
+ */
+void ORTInference::setGraphOptimizationLevel (GraphOptimizationLevel level) {
+  sessionOptions.SetGraphOptimizationLevel(level);
 }
